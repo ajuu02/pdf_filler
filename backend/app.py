@@ -1,15 +1,126 @@
-from flask import Flask, jsonify, request, send_file
+
+from flask import Flask, jsonify, request, send_file, send_from_directory
 from flask_cors import CORS
 import os
 from PyPDF2.generic import NameObject, BooleanObject
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 CORS(app)
 
-from flask import send_from_directory
-
 TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+print(f"[DEBUG] DATA_DIR is set to: {DATA_DIR}")
+
+# List all CSVs in the data directory (for DataManager UI)
+@app.route('/data_list', methods=['GET'])
+def list_all_csvs():
+    csvs = [f for f in os.listdir(DATA_DIR) if f.lower().endswith('.csv')]
+    return jsonify({'csvs': csvs})
+# Upload a new CSV data file
+@app.route('/upload_data', methods=['POST'])
+def upload_data():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    if not file.filename.lower().endswith('.csv'):
+        return jsonify({'error': 'Only CSV files allowed'}), 400
+    filename = secure_filename(file.filename)
+    save_path = os.path.join(DATA_DIR, filename)
+    file.save(save_path)
+    return jsonify({'success': f'CSV {filename} uploaded successfully.'})
+
+# Delete a CSV data file
+@app.route('/delete_data', methods=['DELETE'])
+def delete_data():
+    name = request.args.get('name')
+    if not name or not name.lower().endswith('.csv'):
+        return jsonify({'error': 'Invalid CSV name'}), 400
+    file_path = os.path.join(DATA_DIR, name)
+    if not os.path.isfile(file_path):
+        return jsonify({'error': 'CSV not found'}), 404
+    os.remove(file_path)
+    return jsonify({'success': f'CSV {name} deleted successfully.'})
+
+# Robustly serve CSV files from the data directory
+@app.route('/datafile/<path:filename>', methods=['GET'])
+def serve_data_csv(filename):
+    import mimetypes
+    from flask import Response
+    # Only allow .csv files, prevent directory traversal
+    if not filename.lower().endswith('.csv') or '/' in filename or '\\' in filename or '..' in filename:
+        return jsonify({'error': 'Only CSV files allowed'}), 400
+    file_path = os.path.join(DATA_DIR, filename)
+    print(f"[DEBUG] Looking for CSV at: {file_path}")
+    if not os.path.isfile(file_path):
+        print(f"[DEBUG] File not found: {file_path}")
+        return jsonify({'error': 'File not found'}), 404
+    # Serve as text/csv with correct headers
+    with open(file_path, 'r', encoding='utf-8') as f:
+        csv_content = f.read()
+    return Response(csv_content, mimetype='text/csv', headers={
+        'Content-Disposition': f'inline; filename={filename}'
+    })
+# Add the /fields endpoint after app is defined
+@app.route('/fields', methods=['GET'])
+def get_pdf_fields():
+    from PyPDF2 import PdfReader
+    template = request.args.get('template')
+    if not template:
+        return jsonify({'error': 'template parameter required'}), 400
+    template_path = os.path.join(TEMPLATES_DIR, template)
+    if not os.path.exists(template_path):
+        return jsonify({'error': 'Template not found'}), 404
+    reader = PdfReader(template_path)
+    fields = reader.get_fields()
+    if not fields:
+        return jsonify({'fields': []})
+    # Convert PyPDF2 field objects to serializable dicts
+    result = []
+    for name, obj in fields.items():
+        field_info = {'name': name}
+        for k, v in obj.items():
+            # Only include serializable values
+            if isinstance(v, (str, int, float, bool)):
+                field_info[k] = v
+            elif hasattr(v, 'get_object'):
+                try:
+                    field_info[k] = str(v.get_object())
+                except Exception:
+                    field_info[k] = str(v)
+            else:
+                field_info[k] = str(v)
+        result.append(field_info)
+    return jsonify({'fields': result})
+
+# Upload a new PDF template
+@app.route('/upload_template', methods=['POST'])
+def upload_template():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+    if not file.filename.lower().endswith('.pdf'):
+        return jsonify({'error': 'Only PDF files allowed'}), 400
+    filename = secure_filename(file.filename)
+    save_path = os.path.join(TEMPLATES_DIR, filename)
+    file.save(save_path)
+    return jsonify({'success': f'Template {filename} uploaded successfully.'})
+
+# Delete a PDF template
+@app.route('/delete_template', methods=['DELETE'])
+def delete_template():
+    name = request.args.get('name')
+    if not name or not name.lower().endswith('.pdf'):
+        return jsonify({'error': 'Invalid template name'}), 400
+    file_path = os.path.join(TEMPLATES_DIR, name)
+    if not os.path.isfile(file_path):
+        return jsonify({'error': 'Template not found'}), 404
+    os.remove(file_path)
+    return jsonify({'success': f'Template {name} deleted successfully.'})
 @app.route('/templates/<path:filename>', methods=['GET'])
 def serve_template_pdf(filename):
     # Security: only allow files in the templates directory and only PDFs
