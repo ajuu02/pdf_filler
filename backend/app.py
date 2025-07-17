@@ -6,8 +6,19 @@ from PyPDF2.generic import NameObject, BooleanObject
 app = Flask(__name__)
 CORS(app)
 
+from flask import send_from_directory
+
 TEMPLATES_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+@app.route('/templates/<path:filename>', methods=['GET'])
+def serve_template_pdf(filename):
+    # Security: only allow files in the templates directory and only PDFs
+    if not filename.lower().endswith('.pdf'):
+        return jsonify({'error': 'Only PDF files allowed'}), 400
+    file_path = os.path.join(TEMPLATES_DIR, filename)
+    if not os.path.isfile(file_path):
+        return jsonify({'error': 'File not found'}), 404
+    return send_from_directory(TEMPLATES_DIR, filename, mimetype='application/pdf', as_attachment=False)
 
 @app.route('/templates', methods=['GET'])
 def list_templates():

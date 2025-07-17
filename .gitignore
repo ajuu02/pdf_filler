@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+.venv/
+venv/
+ENV/
+build/
+dist/
+.eggs/
+*.egg-info/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# React
+/build/
+
+# VSCode
+.vscode/
+
+# Env
+.env
+.env.*
+
+# Misc
+*.sqlite3
+*.db
+*.bak
+*.swp
+*.swo
+*.tmp
+*.log
+
+# System
+Thumbs.db
+Desktop.ini
+
+# Git
+.git/
+.gitkeep
+
+# Others
+frontend/.pnp
+frontend/.pnp.js
+frontend/coverage/
+frontend/.env*
+frontend/.DS_Store
+backend/.DS_Store
