@@ -13,8 +13,13 @@ A web application to fill PDF forms using CSV data.
   - `templates/` — Place your PDF form templates here
   - `data/` — Place your CSV files here (must start with template name)
 - `frontend/` — React app
-  - Modern, interactive UI
-  - Lists templates and CSVs, previews PDFs, downloads filled PDFs
+  - Technical, workflow-driven UI for PDF/CSV automation
+  - Upload/manage PDF templates and CSV data files
+  - Tabular CSV data view with single-row selection for precise PDF filling
+  - Preview blank and filled PDFs in-browser (modal preview)
+  - Download filled PDFs directly
+  - Robust error handling, validation, and feedback for technical users
+  - Designed for power users and automation engineers
 
 ## Quick Start (Development)
 
