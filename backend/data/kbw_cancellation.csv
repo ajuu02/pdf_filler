@@ -1,0 +1,11 @@
+product_name,kundennummer,bestellt_am,erhalten_am,namen,addresse,date,text_9itjn
+Sample Product,12345678,2025-07-01,2025-07-10,Max Mustermann,Sample Street 1,2025-07-17,X
+Another Product,87654321,2025-07-02,2025-07-11,Erika Mustermann,Sample Street 2,2025-07-18,X
+Third Item,11223344,2025-07-03,2025-07-12,John Doe,Example Ave 3,2025-07-19,X
+Fourth Gadget,55667788,2025-07-04,2025-07-13,Jane Doe,Example Ave 4,2025-07-20,X
+Product Five,99887766,2025-07-05,2025-07-14,Peter Jones,Test Road 5,2025-07-21,X
+Item Six,12312312,2025-07-06,2025-07-15,Mary Smith,Test Road 6,2025-07-22,X
+Sample Seven,45645645,2025-07-07,2025-07-16,Hans Schmidt,Musterstraße 7,2025-07-23,X
+Eighth Wonder,78978978,2025-07-08,2025-07-17,Anna Müller,Musterstraße 8,2025-07-24,X
+Product Nine,10101010,2025-07-09,2025-07-18,Klaus Meier,Beispielweg 9,2025-07-25,X
+Tenth Article,20202020,2025-07-10,2025-07-19,Sabine Fischer,Beispielweg 10,2025-07-26,X
